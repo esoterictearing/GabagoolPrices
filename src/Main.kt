@@ -49,7 +49,18 @@ fun main() {
     coal *= amount
     var splitCoal = coal/4
     println("\nGabagool: $gabagool")
-    println("Coal: $coal (($splitCoal)x4)")
+
+    if (splitCoal > 71000) {
+
+        splitCoal /= 2
+        println("Coal: $coal (($splitCoal)x8)")
+
+
+    } else {
+
+        println("Coal: $coal (($splitCoal)x4)")
+
+    }
     println("Sulphur: $sulphur")
 
 }
