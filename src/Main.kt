@@ -52,8 +52,11 @@ fun main() {
 
     if (splitCoal > 71000) {
 
-        splitCoal /= 2
-        println("Coal: $coal (($splitCoal)x8)")
+
+        var remainder = coal % 71000
+        coal /= 71000
+
+        println("Coal: $coal orders of 71k, 1 order of $remainder")
 
 
     } else {
