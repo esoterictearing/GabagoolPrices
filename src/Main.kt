@@ -1,15 +1,13 @@
-//TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
-// click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
 import java.net.URI
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
 
-fun getPrice(json: String, itemId: String) : Double {
+fun getPrice(json: String, itemId: String, orderType: String) : Double {
 
     val itemStart = json.indexOf("\"$itemId\":")
     if (itemStart == -1) return 0.0
-    val priceKey = "\"sellPrice\":"
+    val priceKey = "\"$orderType\":"
     val priceStart = json.indexOf(priceKey, itemStart) + priceKey.length
     val priceEnd = json.indexOfFirst { it == ',' || it == '}' }.let {
         json.indexOf(',', priceStart)
@@ -17,11 +15,7 @@ fun getPrice(json: String, itemId: String) : Double {
     return json.substring(priceStart, priceEnd).trim().toDouble()
 }
 
-
-
-
 fun main() {
-
 
     val client = HttpClient.newHttpClient()
     val request = HttpRequest.newBuilder()
@@ -30,34 +24,31 @@ fun main() {
 
     val response = client.send(request, HttpResponse.BodyHandlers.ofString())
     val body = response.body()
-    val sulphurPrice = getPrice(body, "ENCHANTED_SULPHUR")
-    val coalPrice = getPrice(body, "ENCHANTED_COAL")
-    val gabagoolPrice = getPrice(body, "VERY_CRUDE_GABAGOOL")
 
-    println("Gabagool Price: ${gabagoolPrice.toInt()} " +
-            "\nCoal Price: ${coalPrice.toInt()}" +
-            "\nSulfur Price: ${sulphurPrice.toInt()}")
+    val sulphurPrice = getPrice(body, "ENCHANTED_SULPHUR", "sellPrice").toInt()
+    val coalPrice = getPrice(body, "ENCHANTED_COAL", "sellPrice").toInt()
+    val gabagoolPrice = getPrice(body, "VERY_CRUDE_GABAGOOL", "sellPrice").toInt()
 
-    var sulphur: Int = 76
-    var gabagool: Int = 36
-    var coal: Int = 1212
+    var sulphur = 76
+    var gabagool = 36
+    var coal = 1212
 
-    print("Enter amount: ")
-    var amount = readln().toInt()
+    print("\nEnter amount: ")
+    val amount = readln().toInt()
+
     sulphur *= amount
     gabagool *= amount
     coal *= amount
-    var splitCoal = coal/4
+    val splitCoal = coal/4
     println("\nGabagool: $gabagool")
+    val coalCost = coal * coalPrice
 
     if (splitCoal > 71000) {
 
+        val remainder = coal % 71000
+        val orderAmount = coal / 71000
 
-        var remainder = coal % 71000
-        coal /= 71000
-
-        println("Coal: $coal orders of 71k, 1 order of $remainder")
-
+        println("Coal: $orderAmount orders of 71k, 1 order of $remainder")
 
     } else {
 
@@ -65,5 +56,18 @@ fun main() {
 
     }
     println("Sulphur: $sulphur")
+
+    val gabagoolCost = gabagool * gabagoolPrice
+    val sulphurCost = sulphur * sulphurPrice
+    val totalCost = coalCost + gabagoolCost + sulphurCost
+
+    print("\nGabagool will cost %,d".format(gabagoolCost))
+    print("\nCoal will cost %,d".format(coalCost))
+    print("\nSulphur will cost %,d".format(sulphurCost))
+    println("\nTotal is %,d".format(totalCost))
+
+
+    val profitEstimate = getPrice(body, "HYPERGOLIC_GABAGOOL", "buyPrice").toInt() * amount - totalCost
+    print("\nEstimated profit: %,d".format(profitEstimate))
 
 }
